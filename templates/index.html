@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .response {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #444;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>PDF Chatbot</h1>
+        <form id="queryForm" class="input-group">
+            <input type="text" id="queryInput" name="query" placeholder="Ask a question..." required />
+            <input type="submit" value="Submit" />
+        </form>
+
+        <div class="response" id="responseContainer">
+            <!-- Response from backend will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const query = document.getElementById('queryInput').value;
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseContainer = document.getElementById('responseContainer');
+                responseContainer.innerHTML = `<p>${data.response}</p>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+
+</body>
+</html>
+
+

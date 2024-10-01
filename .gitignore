@@ -1,0 +1,42 @@
+.env
+venv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment directory
+venv/
+# Local uploaded files
+uploads/
+# Temporary PDF files
+*.pdf
+
+# Environment variables file
+.env
+
+# VS Code files
+.vscode/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Ignore models and vector store files
+models/
+
+# Ignore compiled files or unnecessary build outputs
+*.egg-info/
+dist/
+build/
+
+# MacOS system files
+.DS_Store
+
+# Python virtual environment related files
+*.venv
+
+# Test and temporary files
+test.py
+
