@@ -1,6 +1,10 @@
 import pymysql
 from dotenv import load_dotenv
 import os
+import logging
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -11,52 +15,73 @@ MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
-# Function to establish a MySQL connection using pymysql
 def get_db_connection():
+    """
+    Establish a MySQL connection using pymysql.
+
+    Returns:
+        Connection: pymysql database connection object.
+    """
     try:
         db = pymysql.connect(
             host=MYSQL_HOST,
             user=MYSQL_USER,
             password=MYSQL_PASSWORD,
-            database=MYSQL_DATABASE
+            database=MYSQL_DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
         )
+        logger.info("Database connection established.")
         return db
     except pymysql.MySQLError as e:
-        print(f"Error: {e}")
-        return None
+        logger.exception(f"Database connection failed: {e}")
+        raise
 
-# Function to store document information in the database
 def store_document_info(username, doc_name, vector_path):
-    db = get_db_connection()
-    if db:
-        cursor = db.cursor()
-        insert_query = """
-            INSERT INTO pdf_chatbot_document (username, doc_name, vector_path, created_at, updated_at)
-            VALUES (%s, %s, %s, NOW(), NOW())
-        """
-        cursor.execute(insert_query, (username, doc_name, vector_path))
-        db.commit()
-        cursor.close()
-        db.close()
+    """
+    Store document information in the database.
 
-# Function to get all documents for listing
+    Args:
+        username (str): Username of the user.
+        doc_name (str): Name of the document.
+        vector_path (str): Path to the vector store.
+    """
+    try:
+        db = get_db_connection()
+        with db.cursor() as cursor:
+            insert_query = """
+                INSERT INTO pdf_chatbot_document (username, doc_name, vector_path, created_at, updated_at)
+                VALUES (%s, %s, %s, NOW(), NOW())
+            """
+            cursor.execute(insert_query, (username, doc_name, vector_path))
+            db.commit()
+            logger.info(f"Document info stored for user {username}, document {doc_name}.")
+    except Exception as e:
+        logger.exception(f"Failed to store document info: {e}")
+        raise
+    finally:
+        if db:
+            db.close()
+            logger.info("Database connection closed.")
+
 def get_all_documents():
-    db = get_db_connection()
-    if db:
-        cursor = db.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT id, username, doc_name, vector_path, created_at FROM pdf_chatbot_document")
-        documents = cursor.fetchall()
-        cursor.close()
-        db.close()
-        return documents
-    return []
+    """
+    Retrieve all documents from the database.
 
-# Test the connection independently
-if __name__ == "__main__":
-    db = get_db_connection()
-    if db:
-        print("Database connection was successful.")
-    else:
-        print("Failed to connect to the database.")
-
+    Returns:
+        list: List of documents.
+    """
+    try:
+        db = get_db_connection()
+        with db.cursor() as cursor:
+            cursor.execute("SELECT id, username, doc_name, vector_path, created_at FROM pdf_chatbot_document")
+            documents = cursor.fetchall()
+            logger.info(f"Retrieved {len(documents)} documents from the database.")
+            return documents
+    except Exception as e:
+        logger.exception(f"Failed to retrieve documents: {e}")
+        raise
+    finally:
+        if db:
+            db.close()
+            logger.info("Database connection closed.")
 
