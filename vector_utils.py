@@ -21,7 +21,7 @@ def create_vector_store_from_text(chunks, api_key, save_path):
     
     try:
         # Using the updated version of OpenAIEmbeddings
-        embeddings = OpenAIEmbeddings(openai_api_key=api_key)
+        embeddings = OpenAIEmbeddings(model="text-embedding-3-large", openai_api_key=api_key)
         vector_store = FAISS.from_texts(chunks, embeddings)
         vector_store.save_local(save_path)
         return vector_store
